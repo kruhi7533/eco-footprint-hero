@@ -10,7 +10,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-ecoLight">
-      <NavMenu />
+      <NavMenu activeTab={activeTab} onTabChange={setActiveTab} />
       
       <div className="container mx-auto py-6 px-4 flex-1">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

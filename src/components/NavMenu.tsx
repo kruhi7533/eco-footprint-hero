@@ -8,20 +8,24 @@ import { mockUser } from "@/lib/mockData";
 type NavItem = {
   name: string;
   icon: React.ComponentType<{ className?: string }>;
-  href: string;
+  value: string; // This will be used to match with tab values
 };
 
+// Updated to include values that match tab values
 const navItems: NavItem[] = [
-  { name: "Dashboard", icon: Home, href: "#dashboard" },
-  { name: "Track", icon: Leaf, href: "#track" },
-  { name: "Progress", icon: ChartBar, href: "#progress" },
-  { name: "Achievements", icon: Star, href: "#achievements" },
-  { name: "Settings", icon: Settings, href: "#settings" },
+  { name: "Dashboard", icon: Home, value: "dashboard" },
+  { name: "Track", icon: Leaf, value: "track" },
+  { name: "Progress", icon: ChartBar, value: "progress" },
+  { name: "Achievements", icon: Star, value: "achievements" },
+  { name: "Settings", icon: Settings, value: "settings" },
 ];
 
-export function NavMenu() {
-  const [activeItem, setActiveItem] = useState("Dashboard");
+interface NavMenuProps {
+  activeTab: string;
+  onTabChange: (value: string) => void;
+}
 
+export function NavMenu({ activeTab, onTabChange }: NavMenuProps) {
   return (
     <div className="flex flex-col md:flex-row items-center justify-between w-full px-4 py-2 bg-white border-b shadow-sm">
       <div className="flex items-center space-x-2 mb-2 md:mb-0">
@@ -37,11 +41,11 @@ export function NavMenu() {
             size="sm"
             className={cn(
               "flex items-center space-x-1 px-2",
-              activeItem === item.name
+              activeTab === item.value
                 ? "bg-ecoLight text-ecoPrimary font-medium"
                 : "text-gray-600 hover:text-ecoPrimary hover:bg-ecoLight/50"
             )}
-            onClick={() => setActiveItem(item.name)}
+            onClick={() => onTabChange(item.value)}
           >
             <item.icon className="h-4 w-4" />
             <span>{item.name}</span>
