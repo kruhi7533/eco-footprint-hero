@@ -1,8 +1,7 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Badge } from "@/components/ui/badge";
-import { ChartLineUp, Leaf, Lightbulb, TrendingUp, Utensils } from "lucide-react";
+import { ChartLine, Leaf, Lightbulb, TrendingUp, Utensils } from "lucide-react";
 import { mockWeeklyData, mockUser } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 
@@ -116,7 +115,7 @@ export function Progress() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <ChartLineUp className="h-4 w-4 text-purple-500" /> Waste
+                <ChartLine className="h-4 w-4 text-purple-500" /> Waste
               </CardTitle>
               <Badge className={improvements.waste > 0 ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
                 {improvements.waste > 0 ? `${improvements.waste}% Improved` : "No improvement yet"}
