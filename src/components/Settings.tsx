@@ -1,0 +1,196 @@
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { mockUser } from "@/lib/mockData";
+import { toast } from "sonner";
+
+const userFormSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  notifications: z.boolean().default(true),
+  emailUpdates: z.boolean().default(true),
+  measurementUnit: z.enum(["metric", "imperial"])
+});
+
+export function Settings() {
+  const form = useForm<z.infer<typeof userFormSchema>>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: {
+      name: mockUser.name,
+      email: mockUser.email,
+      notifications: true,
+      emailUpdates: true,
+      measurementUnit: "metric"
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof userFormSchema>) {
+    // In a real app, this would update the user settings in the database
+    toast.success("Settings updated successfully!");
+    console.log(values);
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header section */}
+      <div className="rounded-lg p-6 eco-gradient">
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="opacity-90">Customize your EcoStep experience and manage your account preferences.</p>
+      </div>
+      
+      <Tabs defaultValue="account" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          <TabsTrigger value="privacy">Privacy</TabsTrigger>
+        </TabsList>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>User Settings</CardTitle>
+            <CardDescription>Manage your account settings and preferences.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Your email address" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <Separator className="my-4" />
+                
+                <FormField
+                  control={form.control}
+                  name="measurementUnit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Measurement Units</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select measurement system" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="metric">Metric (kg, kilometers)</SelectItem>
+                          <SelectItem value="imperial">Imperial (lbs, miles)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>Choose your preferred measurement system.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <Separator className="my-4" />
+                
+                <FormField
+                  control={form.control}
+                  name="notifications"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Push Notifications</FormLabel>
+                        <FormDescription>
+                          Receive notifications about your carbon goals and achievements.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="emailUpdates"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Email Updates</FormLabel>
+                        <FormDescription>
+                          Receive weekly summaries and tips via email.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex justify-end space-x-4">
+                  <Button type="button" variant="outline">Reset</Button>
+                  <Button type="submit">Save Changes</Button>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+        
+        <div className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-red-600">Danger Zone</CardTitle>
+              <CardDescription>Irreversible actions for your account</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium">Delete All Data</h4>
+                  <p className="text-sm text-gray-600 mb-2">Delete all your carbon tracking history and reset your progress.</p>
+                  <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">Delete All Data</Button>
+                </div>
+                <div>
+                  <h4 className="font-medium">Delete Account</h4>
+                  <p className="text-sm text-gray-600 mb-2">Permanently delete your account and all associated data.</p>
+                  <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">Delete Account</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Tabs>
+    </div>
+  );
+}
