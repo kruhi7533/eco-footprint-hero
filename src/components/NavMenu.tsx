@@ -1,9 +1,18 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Leaf, Home, ChartBar, Star, Settings, User } from "lucide-react";
+import { Leaf, Home, ChartBar, Star, Settings, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mockUser } from "@/lib/mockData";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type NavItem = {
   name: string;
@@ -26,6 +35,14 @@ interface NavMenuProps {
 }
 
 export function NavMenu({ activeTab, onTabChange }: NavMenuProps) {
+  const handleProfileAction = (action: string) => {
+    console.log(`Profile action: ${action}`);
+    // Here you could add actual logic for profile actions
+    if (action === "settings") {
+      onTabChange("settings");
+    }
+  };
+
   return (
     <div className="flex flex-col md:flex-row items-center justify-between w-full px-4 py-2 bg-white border-b shadow-sm">
       <div className="flex items-center space-x-2 mb-2 md:mb-0">
@@ -54,13 +71,40 @@ export function NavMenu({ activeTab, onTabChange }: NavMenuProps) {
       </div>
       
       <div className="flex items-center space-x-2 mt-2 md:mt-0">
-        <div className="hidden sm:block text-right">
-          <p className="text-sm font-medium text-gray-700">{mockUser.name}</p>
-          <p className="text-xs text-gray-500">Level {mockUser.level}</p>
-        </div>
-        <div className="rounded-full bg-ecoPrimary/10 p-1">
-          <User className="h-6 w-6 text-ecoPrimary" />
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="p-0 hover:bg-transparent" aria-label="Profile options">
+              <div className="flex items-center space-x-2">
+                <div className="hidden sm:block text-right">
+                  <p className="text-sm font-medium text-gray-700">{mockUser.name}</p>
+                  <p className="text-xs text-gray-500">Level {mockUser.level}</p>
+                </div>
+                <Avatar className="h-8 w-8 bg-ecoPrimary/10">
+                  <AvatarFallback className="text-ecoPrimary">
+                    <User className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleProfileAction("profile")}>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleProfileAction("settings")}>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleProfileAction("logout")}>
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
