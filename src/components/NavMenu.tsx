@@ -37,9 +37,19 @@ interface NavMenuProps {
 export function NavMenu({ activeTab, onTabChange }: NavMenuProps) {
   const handleProfileAction = (action: string) => {
     console.log(`Profile action: ${action}`);
-    // Here you could add actual logic for profile actions
+    
     if (action === "settings") {
       onTabChange("settings");
+    } else if (action === "logout") {
+      // Handle logout action
+      alert("You have been logged out!");
+      // In a real app, you would call a logout function here
+      // Example: logoutUser();
+    } else if (action === "profile") {
+      // Handle profile action
+      alert("Viewing profile...");
+      // In a real app, you would navigate to profile page
+      // Example: navigateToProfile();
     }
   };
 
@@ -87,7 +97,7 @@ export function NavMenu({ activeTab, onTabChange }: NavMenuProps) {
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56 bg-white">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleProfileAction("profile")}>
