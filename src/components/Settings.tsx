@@ -10,33 +10,61 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockUser } from "@/lib/mockData";
+import { useAuth } from "@/contexts/AuthContext";
+import { updateProfile } from "@/lib/supabase";
+import { useState } from "react";
 import { toast } from "sonner";
 
 const userFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
+  email: z.string().email({ message: "Please enter a valid email address." }).optional(),
   notifications: z.boolean().default(true),
   emailUpdates: z.boolean().default(true),
   measurementUnit: z.enum(["metric", "imperial"])
 });
 
 export function Settings() {
+  const { profile, refreshProfile } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const form = useForm<z.infer<typeof userFormSchema>>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      name: mockUser.name,
-      email: mockUser.email,
+      name: profile?.name || "",
+      email: profile?.email || "",
       notifications: true,
       emailUpdates: true,
-      measurementUnit: "metric"
+      measurementUnit: (profile?.measurement_unit as "metric" | "imperial") || "metric"
     },
   });
 
-  function onSubmit(values: z.infer<typeof userFormSchema>) {
-    // In a real app, this would update the user settings in the database
-    toast.success("Settings updated successfully!");
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof userFormSchema>) {
+    setIsSubmitting(true);
+    try {
+      await updateProfile({
+        name: values.name,
+        measurement_unit: values.measurementUnit
+      });
+      
+      await refreshProfile();
+      toast.success("Settings updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update settings. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleReset() {
+    form.reset({
+      name: profile?.name || "",
+      email: profile?.email || "",
+      notifications: true,
+      emailUpdates: true,
+      measurementUnit: (profile?.measurement_unit as "metric" | "imperial") || "metric"
+    });
+    toast.info("Form reset to original values");
   }
 
   return (
@@ -83,8 +111,11 @@ export function Settings() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your email address" {...field} />
+                        <Input placeholder="Your email address" {...field} disabled />
                       </FormControl>
+                      <FormDescription>
+                        Email cannot be changed. Contact support if needed.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -160,8 +191,10 @@ export function Settings() {
                 />
                 
                 <div className="flex justify-end space-x-4">
-                  <Button type="button" variant="outline">Reset</Button>
-                  <Button type="submit">Save Changes</Button>
+                  <Button type="button" variant="outline" onClick={handleReset}>Reset</Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Saving..." : "Save Changes"}
+                  </Button>
                 </div>
               </form>
             </Form>

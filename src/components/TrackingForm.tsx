@@ -7,74 +7,155 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { calculateTransportEmissions, calculateEnergyEmissions, calculateDietEmissions, calculateWasteEmissions } from "@/lib/carbonUtils";
+import { 
+  calculateTransportEmissions, 
+  calculateEnergyEmissions, 
+  calculateDietEmissions, 
+  calculateWasteEmissions 
+} from "@/lib/carbonUtils";
+import { addCarbonEntry } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function TrackingForm() {
   const [activeTab, setActiveTab] = useState<string>("transport");
+  const { refreshProfile } = useAuth();
   
   // Transport state
   const [transportMode, setTransportMode] = useState<string>("CAR");
   const [distance, setDistance] = useState<string>("");
+  const [transportLoading, setTransportLoading] = useState(false);
   
   // Energy state
   const [energyType, setEnergyType] = useState<string>("ELECTRICITY");
   const [consumption, setConsumption] = useState<string>("");
+  const [energyLoading, setEnergyLoading] = useState(false);
   
   // Diet state
   const [dietType, setDietType] = useState<string>("AVERAGE");
+  const [dietLoading, setDietLoading] = useState(false);
   
   // Waste state
   const [wasteType, setWasteType] = useState<string>("LANDFILL");
   const [weight, setWeight] = useState<string>("");
+  const [wasteLoading, setWasteLoading] = useState(false);
   
-  const handleTransportSubmit = () => {
+  const handleTransportSubmit = async () => {
     if (!distance || isNaN(Number(distance)) || Number(distance) <= 0) {
       toast.error("Please enter a valid distance");
       return;
     }
     
-    const emissions = calculateTransportEmissions(
-      transportMode as any, 
-      Number(distance)
-    );
-    
-    toast.success(`${emissions.toFixed(2)} kg CO₂ added to your footprint`);
-    setDistance("");
+    setTransportLoading(true);
+    try {
+      const emissions = calculateTransportEmissions(
+        transportMode as any, 
+        Number(distance)
+      );
+      
+      await addCarbonEntry({
+        date: new Date().toISOString().split('T')[0],
+        category: 'transportation',
+        activity_type: transportMode,
+        amount: Number(distance),
+        emissions
+      });
+      
+      toast.success(`${emissions.toFixed(2)} kg CO₂ added to your footprint`);
+      setDistance("");
+      refreshProfile(); // Update user profile with new points/achievements
+    } catch (error) {
+      console.error('Error adding transportation entry:', error);
+      toast.error("Failed to log transportation. Please try again.");
+    } finally {
+      setTransportLoading(false);
+    }
   };
   
-  const handleEnergySubmit = () => {
+  const handleEnergySubmit = async () => {
     if (!consumption || isNaN(Number(consumption)) || Number(consumption) <= 0) {
       toast.error("Please enter a valid consumption amount");
       return;
     }
     
-    const emissions = calculateEnergyEmissions(
-      energyType as any,
-      Number(consumption)
-    );
-    
-    toast.success(`${emissions.toFixed(2)} kg CO₂ added to your footprint`);
-    setConsumption("");
+    setEnergyLoading(true);
+    try {
+      const emissions = calculateEnergyEmissions(
+        energyType as any,
+        Number(consumption)
+      );
+      
+      await addCarbonEntry({
+        date: new Date().toISOString().split('T')[0],
+        category: 'energy',
+        activity_type: energyType,
+        amount: Number(consumption),
+        emissions
+      });
+      
+      toast.success(`${emissions.toFixed(2)} kg CO₂ added to your footprint`);
+      setConsumption("");
+      refreshProfile(); // Update user profile with new points/achievements
+    } catch (error) {
+      console.error('Error adding energy entry:', error);
+      toast.error("Failed to log energy usage. Please try again.");
+    } finally {
+      setEnergyLoading(false);
+    }
   };
   
-  const handleDietSubmit = () => {
-    const emissions = calculateDietEmissions(dietType as any);
-    toast.success(`${emissions.toFixed(2)} kg CO₂ added to your footprint`);
+  const handleDietSubmit = async () => {
+    setDietLoading(true);
+    try {
+      const emissions = calculateDietEmissions(dietType as any);
+      
+      await addCarbonEntry({
+        date: new Date().toISOString().split('T')[0],
+        category: 'diet',
+        activity_type: dietType,
+        amount: 1, // One day of this diet type
+        emissions
+      });
+      
+      toast.success(`${emissions.toFixed(2)} kg CO₂ added to your footprint`);
+      refreshProfile(); // Update user profile with new points/achievements
+    } catch (error) {
+      console.error('Error adding diet entry:', error);
+      toast.error("Failed to log diet. Please try again.");
+    } finally {
+      setDietLoading(false);
+    }
   };
   
-  const handleWasteSubmit = () => {
+  const handleWasteSubmit = async () => {
     if (!weight || isNaN(Number(weight)) || Number(weight) <= 0) {
       toast.error("Please enter a valid weight");
       return;
     }
     
-    const emissions = calculateWasteEmissions(
-      wasteType as any,
-      Number(weight)
-    );
-    
-    toast.success(`${emissions.toFixed(2)} kg CO₂ added to your footprint`);
-    setWeight("");
+    setWasteLoading(true);
+    try {
+      const emissions = calculateWasteEmissions(
+        wasteType as any,
+        Number(weight)
+      );
+      
+      await addCarbonEntry({
+        date: new Date().toISOString().split('T')[0],
+        category: 'waste',
+        activity_type: wasteType,
+        amount: Number(weight),
+        emissions
+      });
+      
+      toast.success(`${emissions.toFixed(2)} kg CO₂ added to your footprint`);
+      setWeight("");
+      refreshProfile(); // Update user profile with new points/achievements
+    } catch (error) {
+      console.error('Error adding waste entry:', error);
+      toast.error("Failed to log waste. Please try again.");
+    } finally {
+      setWasteLoading(false);
+    }
   };
 
   return (
@@ -128,8 +209,9 @@ export function TrackingForm() {
               <Button 
                 className="w-full eco-gradient border-0" 
                 onClick={handleTransportSubmit}
+                disabled={transportLoading}
               >
-                Log Transportation
+                {transportLoading ? "Logging..." : "Log Transportation"}
               </Button>
             </TabsContent>
             
@@ -163,8 +245,9 @@ export function TrackingForm() {
               <Button 
                 className="w-full eco-gradient border-0" 
                 onClick={handleEnergySubmit}
+                disabled={energyLoading}
               >
-                Log Energy Usage
+                {energyLoading ? "Logging..." : "Log Energy Usage"}
               </Button>
             </TabsContent>
             
@@ -199,8 +282,9 @@ export function TrackingForm() {
               <Button 
                 className="w-full eco-gradient border-0" 
                 onClick={handleDietSubmit}
+                disabled={dietLoading}
               >
-                Log Diet
+                {dietLoading ? "Logging..." : "Log Diet"}
               </Button>
             </TabsContent>
             
@@ -235,8 +319,9 @@ export function TrackingForm() {
               <Button 
                 className="w-full eco-gradient border-0" 
                 onClick={handleWasteSubmit}
+                disabled={wasteLoading}
               >
-                Log Waste
+                {wasteLoading ? "Logging..." : "Log Waste"}
               </Button>
             </TabsContent>
           </Tabs>
