@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS public.eco_tips (
   impact_level INTEGER DEFAULT 1
 );
 
+
+
 -- Add RLS policies
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.carbon_entries ENABLE ROW LEVEL SECURITY;
@@ -70,43 +72,56 @@ ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
 
 -- Set up Row Level Security policies
 -- Profiles: Users can only read/update their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
 CREATE POLICY "Users can view own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
-  
+
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
 -- Carbon entries: Users can only CRUD their own entries
+DROP POLICY IF EXISTS "Users can view own carbon entries" ON public.carbon_entries;
 CREATE POLICY "Users can view own carbon entries" ON public.carbon_entries
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own carbon entries" ON public.carbon_entries;
 CREATE POLICY "Users can insert own carbon entries" ON public.carbon_entries
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own carbon entries" ON public.carbon_entries;
 CREATE POLICY "Users can update own carbon entries" ON public.carbon_entries
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own carbon entries" ON public.carbon_entries;
 CREATE POLICY "Users can delete own carbon entries" ON public.carbon_entries
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Daily summaries: Users can only CRUD their own summaries
+DROP POLICY IF EXISTS "Users can view own daily summaries" ON public.daily_summaries;
 CREATE POLICY "Users can view own daily summaries" ON public.daily_summaries
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own daily summaries" ON public.daily_summaries;
 CREATE POLICY "Users can insert own daily summaries" ON public.daily_summaries
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own daily summaries" ON public.daily_summaries;
 CREATE POLICY "Users can update own daily summaries" ON public.daily_summaries
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Achievements: Users can only view their own achievements
+DROP POLICY IF EXISTS "Users can view own achievements" ON public.achievements;
 CREATE POLICY "Users can view own achievements" ON public.achievements
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Eco tips are public
 ALTER TABLE public.eco_tips ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view eco tips" ON public.eco_tips;
 CREATE POLICY "Anyone can view eco tips" ON public.eco_tips
   FOR SELECT USING (true);
+
+ 
 
 -- Insert initial eco tips data
 INSERT INTO public.eco_tips (category, tip, impact_level) VALUES
