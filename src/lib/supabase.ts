@@ -58,10 +58,21 @@ export type EcoTip = {
   impact_level: number;
 };
 
-// Initialize Supabase client
+// Check if Supabase environment variables are set
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Display a more helpful error message in development
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error(
+    "ERROR: Supabase environment variables are missing. Make sure to set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment."
+  );
+}
+
+// Initialize Supabase client with fallbacks to prevent runtime errors
 export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
+  supabaseUrl || 'https://placeholder-url.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
 );
 
 // Helper function to get a user's profile
