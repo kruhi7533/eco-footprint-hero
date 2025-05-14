@@ -111,7 +111,7 @@ export function Settings() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your email address" {...field} disabled />
+                        <Input placeholder="Your email address" {...field}  />
                       </FormControl>
                       <FormDescription>
                         Email cannot be changed. Contact support if needed.
