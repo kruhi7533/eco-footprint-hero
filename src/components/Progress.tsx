@@ -1,27 +1,36 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Badge } from "@/components/ui/badge";
-import { ChartLine, Leaf, Lightbulb, TrendingUp, Utensils } from "lucide-react";
-import { mockWeeklyData, mockUser } from "@/lib/mockData";
-import { cn } from "@/lib/utils";
+import { ChartLine, Leaf, Lightbulb, TrendingUp, Utensils, Loader2 } from "lucide-react";
+import { useCarbonData } from "@/hooks/useCarbonData";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Progress() {
-  // Calculate improvements
-  const firstDay = mockWeeklyData[0];
-  const lastDay = mockWeeklyData[mockWeeklyData.length - 1];
+  const { profile } = useAuth();
+  const { summaries, isLoading, error, improvements } = useCarbonData(30); // Get a month of data
   
-  const calculateImprovement = (first: number, last: number) => {
-    const diff = ((first - last) / first) * 100;
-    return diff > 0 ? parseFloat(diff.toFixed(1)) : 0;
-  };
-
-  const improvements = {
-    transportation: calculateImprovement(firstDay.transportation, lastDay.transportation),
-    energy: calculateImprovement(firstDay.energy, lastDay.energy),
-    diet: calculateImprovement(firstDay.diet, lastDay.diet),
-    waste: calculateImprovement(firstDay.waste, lastDay.waste),
-    overall: calculateImprovement(firstDay.total, lastDay.total)
-  };
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-ecoPrimary" />
+        <span className="ml-2">Loading your progress data...</span>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Error Loading Data</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Sorry, we couldn't load your progress data. Please try again later.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -32,11 +41,15 @@ export function Progress() {
         <div className="mt-4 flex flex-wrap gap-3">
           <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
             <span className="block text-sm opacity-80">Current Level</span>
-            <span className="text-xl font-bold">{mockUser.level}</span>
+            <span className="text-xl font-bold">{profile?.level || 1}</span>
           </div>
           <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
             <span className="block text-sm opacity-80">Total Reductions</span>
-            <span className="text-xl font-bold">{mockUser.transportationReductions + mockUser.energySavings + mockUser.wasteReduction} kg</span>
+            <span className="text-xl font-bold">
+              {profile ? 
+                (profile.transportation_reductions + profile.energy_savings + profile.waste_reduction).toFixed(1) 
+                : "0"} kg
+            </span>
           </div>
         </div>
       </div>
@@ -52,8 +65,11 @@ export function Progress() {
         <CardContent>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockWeeklyData}>
-                <XAxis dataKey="date" tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} />
+              <LineChart data={summaries}>
+                <XAxis 
+                  dataKey="date" 
+                  tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} 
+                />
                 <YAxis unit=" kg" />
                 <Tooltip
                   formatter={(value: number) => [`${value} kg`, 'Carbon Footprint']}
@@ -80,7 +96,9 @@ export function Progress() {
               </Badge>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600">You've reduced your transportation emissions by {mockUser.transportationReductions} kg.</p>
+              <p className="text-sm text-gray-600">
+                You've reduced your transportation emissions by {profile?.transportation_reductions.toFixed(1) || "0"} kg.
+              </p>
             </CardContent>
           </Card>
           
@@ -94,7 +112,9 @@ export function Progress() {
               </Badge>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600">You've saved {mockUser.energySavings} kg of CO₂ through energy efficiency.</p>
+              <p className="text-sm text-gray-600">
+                You've saved {profile?.energy_savings.toFixed(1) || "0"} kg of CO₂ through energy efficiency.
+              </p>
             </CardContent>
           </Card>
           
@@ -122,7 +142,9 @@ export function Progress() {
               </Badge>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600">You've reduced waste by {mockUser.wasteReduction} kg of CO₂ equivalent.</p>
+              <p className="text-sm text-gray-600">
+                You've reduced waste by {profile?.waste_reduction.toFixed(1) || "0"} kg of CO₂ equivalent.
+              </p>
             </CardContent>
           </Card>
         </div>

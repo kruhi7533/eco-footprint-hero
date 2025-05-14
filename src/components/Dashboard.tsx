@@ -1,31 +1,63 @@
 
-import { GaugeCircle, Leaf, Zap, Utensils, Trash2 } from "lucide-react";
+import { GaugeCircle, Leaf, Zap, Utensils, Trash2, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SummaryCard } from "./SummaryCard";
 import { CarbonChart } from "./CarbonChart";
 import { EcoTips } from "./EcoTips";
 import { Achievements } from "./Achievements";
-import { mockUser, totalCarbonFootprint, averageFootprints } from "@/lib/mockData";
+import { useCarbonData } from "@/hooks/useCarbonData";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Dashboard() {
+  const { profile } = useAuth();
+  const { summaries, isLoading, error, improvements, profile: userProfile } = useCarbonData(7);
+  
+  // Calculate total carbon footprint
+  const totalCarbonFootprint = summaries?.reduce((sum, day) => sum + day.total, 0).toFixed(1) || "0";
+  
+  // Get the latest day's emissions
+  const latestDay = summaries && summaries.length > 0 ? summaries[summaries.length - 1] : null;
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-ecoPrimary" />
+        <span className="ml-2">Loading your eco data...</span>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Error Loading Data</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Sorry, we couldn't load your eco data. Please try again later.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <div className="space-y-6">
       {/* Welcome section */}
       <div className="rounded-lg p-6 eco-gradient">
-        <h1 className="text-2xl font-bold">Welcome, {mockUser.name}!</h1>
+        <h1 className="text-2xl font-bold">Welcome, {profile?.name || 'Eco Friend'}!</h1>
         <p className="opacity-90">Track your carbon footprint and make a positive impact on the environment.</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
             <span className="block text-sm opacity-80">Eco Points</span>
-            <span className="text-xl font-bold">{mockUser.ecoPoints}</span>
+            <span className="text-xl font-bold">{profile?.eco_points || 0}</span>
           </div>
           <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
             <span className="block text-sm opacity-80">Level</span>
-            <span className="text-xl font-bold">{mockUser.level}</span>
+            <span className="text-xl font-bold">{profile?.level || 1}</span>
           </div>
           <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
             <span className="block text-sm opacity-80">Streak</span>
-            <span className="text-xl font-bold">{mockUser.consecutiveDays} days</span>
+            <span className="text-xl font-bold">{profile?.consecutive_days || 0} days</span>
           </div>
         </div>
       </div>
@@ -37,25 +69,26 @@ export function Dashboard() {
           value={`${totalCarbonFootprint} kg`}
           description="Total CO₂ emissions"
           icon={<GaugeCircle />}
-          trend={{ value: 5.2, isPositive: true }}
+          trend={improvements.overall > 0 ? { value: improvements.overall, isPositive: true } : undefined}
         />
         <SummaryCard
           title="Transportation"
-          value="28.3 kg"
+          value={latestDay ? `${latestDay.transportation.toFixed(1)} kg` : "0 kg"}
           icon={<Leaf />}
-          trend={{ value: 3.1, isPositive: true }}
+          trend={improvements.transportation > 0 ? { value: improvements.transportation, isPositive: true } : undefined}
         />
         <SummaryCard
           title="Energy"
-          value="42.5 kg"
+          value={latestDay ? `${latestDay.energy.toFixed(1)} kg` : "0 kg"}
           icon={<Zap />}
-          trend={{ value: 1.4, isPositive: false }}
+          trend={improvements.energy > 0 ? { value: improvements.energy, isPositive: true } : undefined}
         />
         <SummaryCard
           title="Diet & Waste"
-          value="36.8 kg"
+          value={latestDay ? `${(latestDay.diet + latestDay.waste).toFixed(1)} kg` : "0 kg"}
           icon={<Utensils />}
-          trend={{ value: 2.8, isPositive: true }}
+          trend={(improvements.diet > 0 || improvements.waste > 0) ? 
+            { value: (improvements.diet + improvements.waste) / 2, isPositive: true } : undefined}
         />
       </div>
       
@@ -70,36 +103,41 @@ export function Dashboard() {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium">Your Average</span>
-                <span className="text-sm text-muted-foreground">{averageFootprints.user} kg/day</span>
+                <span className="text-sm text-muted-foreground">
+                  {summaries && summaries.length > 0 
+                    ? (summaries.reduce((sum, day) => sum + day.total, 0) / summaries.length).toFixed(1) 
+                    : "0"} kg/day
+                </span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-ecoPrimary rounded-full" 
-                  style={{ width: `${(averageFootprints.user / averageFootprints.country) * 100}%` }}
+                  style={{ width: `${summaries && summaries.length > 0 ? 
+                    Math.min((summaries.reduce((sum, day) => sum + day.total, 0) / summaries.length) / 15 * 100, 100) : 0}%` }}
                 />
               </div>
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium">Country Average</span>
-                <span className="text-sm text-muted-foreground">{averageFootprints.country} kg/day</span>
+                <span className="text-sm text-muted-foreground">15 kg/day</span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-ecoSecondary rounded-full" 
-                  style={{ width: `${(averageFootprints.country / averageFootprints.country) * 100}%` }}
+                  style={{ width: `${15 / 15 * 100}%` }}
                 />
               </div>
             </div>
             <div>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-medium">Global Average</span>
-                <span className="text-sm text-muted-foreground">{averageFootprints.global} kg/day</span>
+                <span className="text-sm text-muted-foreground">12 kg/day</span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-ecoAccent rounded-full" 
-                  style={{ width: `${(averageFootprints.global / averageFootprints.country) * 100}%` }}
+                  style={{ width: `${12 / 15 * 100}%` }}
                 />
               </div>
             </div>
@@ -109,7 +147,7 @@ export function Dashboard() {
       
       {/* Charts and tips */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-        <CarbonChart />
+        <CarbonChart carbonData={summaries} />
         <EcoTips />
       </div>
       

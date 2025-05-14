@@ -1,7 +1,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
-import { mockWeeklyData } from "@/lib/mockData";
+import { DailySummary } from "@/lib/supabase";
+
+interface CarbonChartProps {
+  carbonData?: DailySummary[];
+}
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -27,7 +31,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export function CarbonChart() {
+export function CarbonChart({ carbonData = [] }: CarbonChartProps) {
   return (
     <Card className="w-full">
       <CardHeader>
@@ -40,7 +44,7 @@ export function CarbonChart() {
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={mockWeeklyData}
+              data={carbonData}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
