@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js'
 
 // Types for our Supabase database
@@ -83,6 +82,7 @@ export const getProfile = async () => {
     throw new Error('User not authenticated');
   }
   
+  // Try to get the existing profile
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
@@ -90,7 +90,41 @@ export const getProfile = async () => {
     .single();
     
   if (error) {
-    throw error;
+    if (error.code === 'PGRST116') {
+      // Profile doesn't exist, create one
+      console.log("Profile doesn't exist, creating new profile for user", user.id);
+      
+      const newProfile: Partial<Profile> = {
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        joined_date: new Date().toISOString(),
+        level: 1,
+        eco_points: 0,
+        consecutive_days: 0,
+        transportation_reductions: 0,
+        energy_savings: 0,
+        waste_reduction: 0,
+        measurement_unit: 'metric',
+        updated_at: new Date().toISOString()
+      };
+      
+      const { data: createdProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert(newProfile)
+        .select('*')
+        .single();
+        
+      if (createError) {
+        console.error('Error creating profile:', createError);
+        throw createError;
+      }
+      
+      return createdProfile as Profile;
+    } else {
+      console.error('Error fetching profile:', error);
+      throw error;
+    }
   }
   
   return data as Profile;
