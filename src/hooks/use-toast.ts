@@ -1,5 +1,5 @@
 
-import { sonner } from "sonner";
+import { toast as sonnerToast, dismiss } from "sonner";
 import { useState, useEffect } from "react";
 
 export interface ToastProps {
@@ -21,7 +21,7 @@ const addToast = (toast: ToastProps) => {
   listeners.forEach(listener => listener(toasts));
 
   // Also show the toast in sonner
-  sonner.toast(toast.title, {
+  sonnerToast(toast.title, {
     id,
     description: toast.description,
     action: toast.action,
@@ -39,7 +39,7 @@ const addToast = (toast: ToastProps) => {
 const dismissToast = (id: string) => {
   toasts = toasts.filter(toast => toast.id !== id);
   listeners.forEach(listener => listener(toasts));
-  sonner.dismiss(id);
+  dismiss(id);
 };
 
 export function toast(props: ToastProps) {
