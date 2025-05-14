@@ -1,5 +1,5 @@
 
-import { toast as sonnerToast, dismiss } from "sonner";
+import { toast as sonnerToast } from "sonner";
 import { useState, useEffect } from "react";
 
 export interface ToastProps {
@@ -39,7 +39,8 @@ const addToast = (toast: ToastProps) => {
 const dismissToast = (id: string) => {
   toasts = toasts.filter(toast => toast.id !== id);
   listeners.forEach(listener => listener(toasts));
-  dismiss(id);
+  // Use the dismiss method from the toast function directly
+  sonnerToast.dismiss(id);
 };
 
 export function toast(props: ToastProps) {
