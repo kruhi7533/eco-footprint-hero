@@ -13,6 +13,9 @@ export type Profile = {
   energy_savings: number;
   waste_reduction: number;
   measurement_unit: 'metric' | 'imperial';
+  language: 'en' | 'es' | 'fr';
+  notifications_enabled: boolean;
+  data_sharing_enabled: boolean;
   updated_at: string;
 };
 
@@ -106,6 +109,9 @@ export const getProfile = async () => {
         energy_savings: 0,
         waste_reduction: 0,
         measurement_unit: 'metric',
+        language: 'en',
+        notifications_enabled: true,
+        data_sharing_enabled: true,
         updated_at: new Date().toISOString()
       };
       
