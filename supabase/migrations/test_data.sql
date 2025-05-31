@@ -115,33 +115,6 @@ INSERT INTO carbon_entries (
     25.0,
     35.0,
     'Bus to work'
-),
-(
-    '3068a26e-f4a2-4d6a-8801-1372b735412d',
-    CURRENT_DATE - INTERVAL '1 day',
-    'energy',
-    'electricity',
-    22.0,
-    55.0,
-    'Home electricity usage'
-),
-(
-    '3068a26e-f4a2-4d6a-8801-1372b735412d',
-    CURRENT_DATE - INTERVAL '1 day',
-    'diet',
-    'vegetarian',
-    0.0,
-    30.0,
-    'Vegetarian day'
-),
-(
-    '3068a26e-f4a2-4d6a-8801-1372b735412d',
-    CURRENT_DATE - INTERVAL '1 day',
-    'waste',
-    'recycled',
-    2.0,
-    18.0,
-    'Recycling day'
 );
 
 -- Verify the data was inserted

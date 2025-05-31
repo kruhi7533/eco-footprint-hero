@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -64,11 +63,11 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				// Custom colors
-				ecoPrimary: '#2D6A4F',
-				ecoSecondary: '#40916C',
-				ecoAccent: '#48CAE4',
-				ecoEarth: '#B08968',
-				ecoLight: '#F1F8F6',
+				ecoPrimary: '#1B4332',
+				ecoSecondary: '#2D6A4F',
+				ecoAccent: '#40916C',
+				ecoEarth: '#8B7355',
+				ecoLight: '#E9F5F1',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

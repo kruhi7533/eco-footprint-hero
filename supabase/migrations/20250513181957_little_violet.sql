@@ -67,16 +67,11 @@ ALTER TABLE public.carbon_entries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_summaries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
 
--- Allow trigger to insert profiles
-CREATE POLICY "Trigger can insert profiles" ON public.profiles
-  FOR INSERT TO postgres
-  WITH CHECK (true);
-
--- Allow users to view their own profile
+-- Set up Row Level Security policies
+-- Profiles: Users can only read/update their own profile
 CREATE POLICY "Users can view own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
-
--- Allow users to update their own profile
+  
 CREATE POLICY "Users can update own profile" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
@@ -296,7 +291,7 @@ AFTER INSERT OR UPDATE ON public.carbon_entries
 FOR EACH ROW
 EXECUTE FUNCTION public.update_daily_summary();
 
--- Function to handle new user creation
+-- Trigger to handle user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -304,11 +299,10 @@ BEGIN
   VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data->>'name', 'User'), NOW());
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql;
 
 -- Create trigger for new user creation
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.handle_new_user();
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_new_user();

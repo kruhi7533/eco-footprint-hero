@@ -11,7 +11,7 @@ type TipCategory = 'transportation' | 'energy' | 'diet' | 'waste';
 interface Tip {
   id: string;
   category: TipCategory;
-  tip: string;
+  content: string;
   impact_level: number;
   created_at: string;
 }
@@ -49,11 +49,15 @@ export function EcoTips() {
       setLoading(true);
       setError(null);
       
-      // Get user's carbon entries to analyze behavior
+      // Get user's carbon entries from the past week to analyze recent behavior
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      
       const { data: carbonEntries, error: entriesError } = await supabase
         .from('carbon_entries')
-        .select('category, emissions')
+        .select('category, emissions, created_at')
         .eq('user_id', profile?.id)
+        .gte('created_at', oneWeekAgo.toISOString())
         .order('created_at', { ascending: false });
 
       if (entriesError) {
@@ -61,11 +65,11 @@ export function EcoTips() {
         throw entriesError;
       }
 
-      // Calculate category statistics
+      // Calculate category statistics only for recent entries
       const categoryStats = calculateCategoryStatistics(carbonEntries || []);
       setCategoryData(categoryStats);
 
-      // Find the first category with entries to set as default selected
+      // Find the first category with recent entries to set as default selected
       const firstCategoryWithEntries = Object.entries(categoryStats)
         .find(([_, data]) => data.hasEntries)?.[0] as TipCategory;
       
@@ -86,7 +90,7 @@ export function EcoTips() {
         throw new Error('No tips found');
       }
 
-      // Organize and filter tips by category
+      // Organize and filter tips by category - only for categories with recent entries
       const organizedTips = {
         transportation: [],
         energy: [],
@@ -96,12 +100,12 @@ export function EcoTips() {
 
       allTips.forEach((tip: any) => {
         const category = tip.category as TipCategory;
-        // Only add tips for categories where user has entries
+        // Only add tips for categories where user has recent entries
         if (organizedTips[category] && categoryStats[category].hasEntries) {
           organizedTips[category].push({
             id: tip.id,
             category: category,
-            tip: tip.tip,
+            content: tip.content,
             impact_level: tip.impact_level * (categoryStats[category].averageEmissions || 1),
             created_at: tip.created_at
           });
@@ -130,7 +134,7 @@ export function EcoTips() {
       waste: { hasEntries: false, totalEmissions: 0, averageEmissions: 0 }
     };
 
-    // Calculate totals and averages
+    // Calculate totals and averages only for entries that exist
     entries.forEach(entry => {
       const category = entry.category as TipCategory;
       if (stats[category]) {
@@ -237,7 +241,7 @@ export function EcoTips() {
               {tips[category].map((tip) => (
                 <div key={tip.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
                   <Leaf className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm">{tip.tip}</p>
+                  <p className="text-sm">{tip.content}</p>
                 </div>
               ))}
               {tips[category].length === 0 && (

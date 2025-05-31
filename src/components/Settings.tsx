@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +32,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
+import { AvatarUpload } from "./AvatarUpload";
 
 type MeasurementUnit = 'metric' | 'imperial';
 type Language = 'en' | 'es' | 'fr';
@@ -375,192 +376,206 @@ export function Settings() {
           <TabsTrigger value="privacy">Privacy</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="account">
-          <Card className="p-6">
-            <form onSubmit={handleSubmit}>
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Manage your account details and preferences.
-                  </p>
-                </div>
+        <TabsContent value="account" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Picture</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AvatarUpload />
+            </CardContent>
+          </Card>
 
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input 
-                      id="name" 
-                      value={userName} 
-                      onChange={(e) => setUserName(e.target.value)}
-                      placeholder="Enter your name"
-                    />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      value={profile?.email || ''} 
-                      disabled 
-                      className="bg-muted"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Email cannot be changed. Contact support if needed.
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Manage your account details and preferences.
                     </p>
                   </div>
 
-                  <div className="grid gap-2">
-                    <Label>Password</Label>
-                    <Dialog 
-                      open={isPasswordDialogOpen} 
-                      onOpenChange={(open) => {
-                        if (!open) {
-                          handleDialogClose();
-                        } else {
-                          setIsPasswordDialogOpen(true);
-                        }
-                      }}
-                    >
-                      <DialogTrigger asChild>
-                        <Button type="button" variant="outline" className="w-full">
-                          Change Password
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                          <DialogTitle>Change Password</DialogTitle>
-                          <DialogDescription>
-                            Enter your current password and choose a new one.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={async (e) => {
-                          e.preventDefault();
-                          await handlePasswordChange();
-                        }}>
-                          <div className="grid gap-4 py-4">
-                            <div className="grid gap-2">
-                              <Label htmlFor="current-password">Current Password</Label>
-                              <Input
-                                id="current-password"
-                                name="current-password"
-                                type="password"
-                                value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                disabled={isChangingPassword}
-                                required
-                                autoComplete="current-password"
-                              />
-                            </div>
-                            <div className="grid gap-2">
-                              <Label htmlFor="new-password">New Password</Label>
-                              <Input
-                                id="new-password"
-                                name="new-password"
-                                type="password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                disabled={isChangingPassword}
-                                required
-                                minLength={6}
-                                autoComplete="new-password"
-                              />
-                            </div>
-                            <div className="grid gap-2">
-                              <Label htmlFor="confirm-password">Confirm New Password</Label>
-                              <Input
-                                id="confirm-password"
-                                name="confirm-password"
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                disabled={isChangingPassword}
-                                required
-                                autoComplete="new-password"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-center mt-2 mb-6">
-                            <Button
-                              type="button"
-                              variant="link"
-                              className="text-sm text-primary hover:text-primary/90 p-0 h-auto font-normal"
-                              onClick={handleForgotPassword}
-                              disabled={isChangingPassword || !canRequestReset}
-                            >
-                              Forgot your password?
-                            </Button>
-                            {!canRequestReset && (
-                              <span className="text-sm text-muted-foreground">
-                                Wait {resetCountdown}s to request again
-                              </span>
-                            )}
-                          </div>
-                          <DialogFooter className="gap-2">
-                            <Button 
-                              type="button"
-                              variant="outline" 
-                              onClick={handleDialogClose}
-                              disabled={isChangingPassword}
-                            >
-                              Cancel
-                            </Button>
-                            <Button 
-                              type="submit"
-                              variant="default"
-                              disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
-                            >
-                              {isChangingPassword ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  <span>Updating...</span>
-                                </>
-                              ) : (
-                                'Update Password'
-                              )}
-                            </Button>
-                          </DialogFooter>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
+                  <div className="space-y-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Name</Label>
+                      <Input 
+                        id="name" 
+                        value={userName} 
+                        onChange={(e) => setUserName(e.target.value)}
+                        placeholder="Enter your name"
+                      />
+                    </div>
 
-                  <div className="grid gap-2">
-                    <Label htmlFor="units">Measurement Units</Label>
-                    <Select 
-                      value={measurementUnit} 
-                      onValueChange={(value: MeasurementUnit) => setMeasurementUnit(value)}
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email" 
+                        value={profile?.email || ''} 
+                        disabled 
+                        className="bg-muted"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Email cannot be changed. Contact support if needed.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label>Password</Label>
+                      <Dialog 
+                        open={isPasswordDialogOpen} 
+                        onOpenChange={(open) => {
+                          if (!open) {
+                            handleDialogClose();
+                          } else {
+                            setIsPasswordDialogOpen(true);
+                          }
+                        }}
+                      >
+                        <DialogTrigger asChild>
+                          <Button type="button" variant="outline" className="w-full">
+                            Change Password
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>Change Password</DialogTitle>
+                            <DialogDescription>
+                              Enter your current password and choose a new one.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            await handlePasswordChange();
+                          }}>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid gap-2">
+                                <Label htmlFor="current-password">Current Password</Label>
+                                <Input
+                                  id="current-password"
+                                  name="current-password"
+                                  type="password"
+                                  value={currentPassword}
+                                  onChange={(e) => setCurrentPassword(e.target.value)}
+                                  disabled={isChangingPassword}
+                                  required
+                                  autoComplete="current-password"
+                                />
+                              </div>
+                              <div className="grid gap-2">
+                                <Label htmlFor="new-password">New Password</Label>
+                                <Input
+                                  id="new-password"
+                                  name="new-password"
+                                  type="password"
+                                  value={newPassword}
+                                  onChange={(e) => setNewPassword(e.target.value)}
+                                  disabled={isChangingPassword}
+                                  required
+                                  minLength={6}
+                                  autoComplete="new-password"
+                                />
+                              </div>
+                              <div className="grid gap-2">
+                                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                <Input
+                                  id="confirm-password"
+                                  name="confirm-password"
+                                  type="password"
+                                  value={confirmPassword}
+                                  onChange={(e) => setConfirmPassword(e.target.value)}
+                                  disabled={isChangingPassword}
+                                  required
+                                  autoComplete="new-password"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center mt-2 mb-6">
+                              <Button
+                                type="button"
+                                variant="link"
+                                className="text-sm text-primary hover:text-primary/90 p-0 h-auto font-normal"
+                                onClick={handleForgotPassword}
+                                disabled={isChangingPassword || !canRequestReset}
+                              >
+                                Forgot your password?
+                              </Button>
+                              {!canRequestReset && (
+                                <span className="text-sm text-muted-foreground">
+                                  Wait {resetCountdown}s to request again
+                                </span>
+                              )}
+                            </div>
+                            <DialogFooter className="gap-2">
+                              <Button 
+                                type="button"
+                                variant="outline" 
+                                onClick={handleDialogClose}
+                                disabled={isChangingPassword}
+                              >
+                                Cancel
+                              </Button>
+                              <Button 
+                                type="submit"
+                                variant="default"
+                                disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
+                              >
+                                {isChangingPassword ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <span>Updating...</span>
+                                  </>
+                                ) : (
+                                  'Update Password'
+                                )}
+                              </Button>
+                            </DialogFooter>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <Label htmlFor="units">Measurement Units</Label>
+                      <Select 
+                        value={measurementUnit} 
+                        onValueChange={(value: MeasurementUnit) => setMeasurementUnit(value)}
+                        disabled={isUpdating}
+                      >
+                        <SelectTrigger id="units">
+                          <SelectValue placeholder="Select measurement system" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="metric">Metric (kg, kilometers)</SelectItem>
+                          <SelectItem value="imperial">Imperial (lbs, miles)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Button 
+                      type="submit"
+                      className="w-full mt-6"
                       disabled={isUpdating}
                     >
-                      <SelectTrigger id="units">
-                        <SelectValue placeholder="Select measurement system" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="metric">Metric (kg, kilometers)</SelectItem>
-                        <SelectItem value="imperial">Imperial (lbs, miles)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <div className="flex items-center justify-center">
+                        {isUpdating ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <span>Saving Changes...</span>
+                          </>
+                        ) : (
+                          'Save Changes'
+                        )}
+                      </div>
+                    </Button>
                   </div>
-
-                  <Button 
-                    type="submit"
-                    className="w-full mt-6"
-                    disabled={isUpdating}
-                  >
-                    <div className="flex items-center justify-center">
-                      {isUpdating ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          <span>Saving Changes...</span>
-                        </>
-                      ) : (
-                        'Save Changes'
-                      )}
-                    </div>
-                  </Button>
                 </div>
-              </div>
-            </form>
+              </form>
+            </CardContent>
           </Card>
         </TabsContent>
 

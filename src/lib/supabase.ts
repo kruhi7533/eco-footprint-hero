@@ -19,18 +19,6 @@ export type Profile = {
   updated_at: string;
 };
 
-export type CarbonEntry = {
-  id: string;
-  user_id: string;
-  date: string;
-  category: 'transportation' | 'energy' | 'diet' | 'waste';
-  activity_type: string;
-  amount: number;
-  emissions: number;
-  notes?: string;
-  created_at: string;
-};
-
 export type DailySummary = {
   id: string;
   user_id: string;
@@ -44,38 +32,51 @@ export type DailySummary = {
   updated_at: string;
 };
 
-export type Achievement = {
+export type AchievementDefinition = {
   id: string;
-  user_id: string;
   achievement_id: string;
   title: string;
   description: string;
+  icon_name: string;
+  category: string;
+  threshold: number | null;
+  unit: string;
+  level: number;
+  points: number;
+  requirements: {
+    type: 'single' | 'multiple' | 'achievements';
+    metric?: string;
+    threshold?: number;
+    requirements?: Array<{ metric: string; threshold: number }>;
+    required?: string[];
+  };
+  created_at: string;
+};
+
+export type UserAchievement = {
+  id: string;
+  user_id: string;
+  achievement_id: string;
   earned_at: string;
 };
 
-export type EcoTip = {
+export type CarbonEntry = {
   id: string;
-  category: string;
-  tip: string;
-  impact_level: number;
+  user_id: string;
+  date: string;
+  category: 'transportation' | 'energy' | 'diet' | 'waste';
+  activity_type: string;
+  amount: number;
+  emissions: number;
+  notes?: string;
+  created_at: string;
 };
 
-// Check if Supabase environment variables are set
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Initialize Supabase client
+const SUPABASE_URL = "https://uqvxekfividzcohphwqm.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxdnhla2ZpdmlkemNvaHBod3FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxNTY1NDYsImV4cCI6MjA2MjczMjU0Nn0.n2MBghl3RiifE8RSMoQdWgyiK-90PYvt3hb1Km8hOss";
 
-// Display a more helpful error message in development
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error(
-    "ERROR: Supabase environment variables are missing. Make sure to set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment."
-  );
-}
-
-// Initialize Supabase client with fallbacks to prevent runtime errors
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder-url.supabase.co',
-  supabaseAnonKey || 'placeholder-key'
-);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Helper function to get a user's profile
 export const getProfile = async () => {
@@ -136,8 +137,8 @@ export const getProfile = async () => {
   return data as Profile;
 };
 
-// Helper function to update a user's profile
-export const updateProfile = async (updates: Partial<Profile>) => {
+// Helper function to get daily summaries for a date range
+export const getDailySummaries = async (startDate: string, endDate: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -145,17 +146,54 @@ export const updateProfile = async (updates: Partial<Profile>) => {
   }
   
   const { data, error } = await supabase
-    .from('profiles')
-    .update(updates)
-    .eq('id', user.id)
-    .select()
-    .single();
+    .from('daily_summaries')
+    .select('*')
+    .eq('user_id', user.id)
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .order('date');
     
   if (error) {
     throw error;
   }
   
-  return data as Profile;
+  return data as DailySummary[];
+};
+
+// Helper function to get achievement definitions
+export const getAchievementDefinitions = async () => {
+  const { data, error } = await supabase
+    .from('achievement_definitions')
+    .select('*')
+    .order('level', { ascending: true })
+    .order('points', { ascending: false });
+    
+  if (error) {
+    throw error;
+  }
+  
+  return data as AchievementDefinition[];
+};
+
+// Helper function to get user's earned achievements
+export const getAchievements = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  
+  const { data, error } = await supabase
+    .from('user_achievements')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('earned_at', { ascending: false });
+    
+  if (error) {
+    throw error;
+  }
+  
+  return data as UserAchievement[];
 };
 
 // Helper function to add a carbon footprint entry
@@ -180,66 +218,4 @@ export const addCarbonEntry = async (entry: Omit<CarbonEntry, 'id' | 'user_id' |
   }
   
   return data as CarbonEntry;
-};
-
-// Helper function to get daily summaries for a date range
-export const getDailySummaries = async (startDate: string, endDate: string) => {
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
-  
-  const { data, error } = await supabase
-    .from('daily_summaries')
-    .select('*')
-    .eq('user_id', user.id)
-    .gte('date', startDate)
-    .lte('date', endDate)
-    .order('date');
-    
-  if (error) {
-    throw error;
-  }
-  
-  return data as DailySummary[];
-};
-
-// Helper function to get user achievements
-export const getAchievements = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    throw new Error('User not authenticated');
-  }
-  
-  const { data, error } = await supabase
-    .from('achievements')
-    .select('*')
-    .eq('user_id', user.id);
-    
-  if (error) {
-    throw error;
-  }
-  
-  return data as Achievement[];
-};
-
-// Helper function to get eco tips
-export const getEcoTips = async (category?: string) => {
-  let query = supabase
-    .from('eco_tips')
-    .select('*');
-    
-  if (category) {
-    query = query.eq('category', category);
-  }
-  
-  const { data, error } = await query;
-    
-  if (error) {
-    throw error;
-  }
-  
-  return data as EcoTip[];
 };

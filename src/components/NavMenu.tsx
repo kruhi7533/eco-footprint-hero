@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -37,8 +36,8 @@ export function NavMenu({ activeTab, onTabChange }: NavMenuProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0 rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg" alt="User" />
+              <Avatar className="h-8 w-8" key={profile?.avatar_url}>
+                <AvatarImage src={profile?.avatar_url || "/images/default-avatar.svg"} alt={profile?.name || "User"} />
                 <AvatarFallback>{profile?.name?.charAt(0) || "U"}</AvatarFallback>
               </Avatar>
             </Button>
@@ -131,8 +130,8 @@ export function NavMenu({ activeTab, onTabChange }: NavMenuProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="h-8 w-8 rounded-full p-0 border border-white/30">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder.svg" alt="User" />
+                <Avatar className="h-8 w-8" key={profile?.avatar_url}>
+                  <AvatarImage src={profile?.avatar_url || "/images/default-avatar.svg"} alt={profile?.name || "User"} />
                   <AvatarFallback>{profile?.name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
               </Button>

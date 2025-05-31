@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +20,8 @@ const Login = () => {
     
     try {
       await signIn(email, password);
-      navigate("/");
+      toast.success("Signed in successfully!");
+      navigate("/dashboard");
     } catch (error) {
       // Error is shown via toast in signIn function
       console.error(error);

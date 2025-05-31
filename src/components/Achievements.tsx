@@ -1,29 +1,38 @@
-
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, Loader2 } from "lucide-react";
+import * as Icons from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { getAchievements } from "@/lib/supabase";
+import { getAchievements, getAchievementDefinitions, type AchievementDefinition } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Achievements() {
-  const { data: achievements, isLoading, error } = useQuery({
+  const { profile } = useAuth();
+  const { data: achievements, isLoading: achievementsLoading } = useQuery({
     queryKey: ['achievements'],
     queryFn: getAchievements,
   });
+
+  const { data: definitions, isLoading: definitionsLoading, error } = useQuery({
+    queryKey: ['achievement-definitions'],
+    queryFn: getAchievementDefinitions,
+  });
+
+  const isLoading = achievementsLoading || definitionsLoading;
 
   if (isLoading) {
     return (
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Star className="h-5 w-5 text-yellow-500" />
+            <Icons.Award className="h-5 w-5 text-yellow-500" />
             <span>Achievements</span>
           </CardTitle>
           <CardDescription>Complete eco-friendly actions to unlock achievements</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-ecoPrimary" />
+            <Icons.Loader2 className="h-8 w-8 animate-spin text-ecoPrimary" />
             <span className="ml-2">Loading achievements...</span>
           </div>
         </CardContent>
@@ -31,12 +40,12 @@ export function Achievements() {
     );
   }
 
-  if (error) {
+  if (error || !definitions) {
     return (
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Star className="h-5 w-5 text-yellow-500" />
+            <Icons.Award className="h-5 w-5 text-yellow-500" />
             <span>Achievements</span>
           </CardTitle>
           <CardDescription>Complete eco-friendly actions to unlock achievements</CardDescription>
@@ -50,52 +59,22 @@ export function Achievements() {
     );
   }
 
-  // Define all possible achievements with their criteria
-  const allAchievements = [
-    {
-      id: "achievement1",
-      title: "Carbon Cutter",
-      description: "Reduce transportation emissions by 50kg",
-      earned: false,
-      date: null,
-    },
-    {
-      id: "achievement2",
-      title: "Energy Saver", 
-      description: "Save 100kWh of energy",
-      earned: false,
-      date: null,
-    },
-    {
-      id: "achievement3",
-      title: "Waste Warrior",
-      description: "Reduce waste by 20kg", 
-      earned: false,
-      date: null,
-    },
-    {
-      id: "achievement4",
-      title: "Eco Streak", 
-      description: "Log your footprint for 7 consecutive days",
-      earned: false,
-      date: null,
-    },
-    {
-      id: "achievement5",
-      title: "Green Guardian", 
-      description: "Master of all eco-friendly habits",
-      earned: false,
-      date: null,
-    },
-  ];
+  // Sort achievements by level and then by points
+  const sortedDefinitions = (definitions as AchievementDefinition[]).sort((a, b) => {
+    if (a.level !== b.level) return a.level - b.level;
+    return b.points - a.points;
+  });
 
-  // Merge earned achievements with all possible achievements
-  const mergedAchievements = allAchievements.map(achievement => {
-    const earnedAchievement = achievements?.find(a => a.achievement_id === achievement.id);
+  // Merge earned achievements with definitions
+  const mergedAchievements = sortedDefinitions.map(definition => {
+    const earnedAchievement = achievements?.find(a => a.achievement_id === definition.achievement_id);
+    const progress = calculateProgress(definition, profile, achievements);
+
     return {
-      ...achievement,
+      ...definition,
       earned: !!earnedAchievement,
-      date: earnedAchievement?.earned_at || null
+      date: earnedAchievement?.earned_at || null,
+      progress
     };
   });
 
@@ -103,42 +82,100 @@ export function Achievements() {
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <Star className="h-5 w-5 text-yellow-500" />
+          <Icons.Award className="h-5 w-5 text-yellow-500" />
           <span>Achievements</span>
         </CardTitle>
         <CardDescription>Complete eco-friendly actions to unlock achievements</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {mergedAchievements.map((achievement) => (
-            <div 
-              key={achievement.id} 
-              className={cn(
-                "flex items-start p-3 border rounded-md",
-                achievement.earned 
-                  ? "border-green-200 bg-green-50" 
-                  : "border-gray-200 bg-gray-50 opacity-60"
-              )}
-            >
-              <div className={cn(
-                "flex items-center justify-center rounded-full w-10 h-10 mr-3",
-                achievement.earned ? "bg-green-100 text-green-600" : "bg-gray-200 text-gray-400"
-              )}>
-                <Star className="h-5 w-5" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-medium">{achievement.title}</h4>
-                <p className="text-sm text-gray-600">{achievement.description}</p>
-                {achievement.earned && achievement.date && (
-                  <p className="text-xs text-green-600 mt-1">
-                    Earned on {new Date(achievement.date).toLocaleDateString()}
-                  </p>
+          {mergedAchievements.map((achievement) => {
+            const Icon = (Icons as any)[achievement.icon_name] || Icons.Award;
+            return (
+              <div 
+                key={achievement.id} 
+                className={cn(
+                  "flex items-start p-4 border rounded-lg transition-all duration-200",
+                  achievement.earned 
+                    ? "border-green-200 bg-green-50 hover:bg-green-100" 
+                    : "border-gray-200 bg-gray-50 hover:bg-gray-100 opacity-80"
                 )}
+              >
+                <div className={cn(
+                  "flex items-center justify-center rounded-full w-12 h-12 mr-4 flex-shrink-0",
+                  achievement.earned ? "bg-green-100 text-green-600" : "bg-gray-200 text-gray-400"
+                )}>
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <h4 className="font-medium">{achievement.title}</h4>
+                      <p className="text-xs text-gray-500">Level {achievement.level} • {achievement.points} points</p>
+                    </div>
+                    {achievement.earned && (
+                      <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        Earned
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">{achievement.description}</p>
+                  
+                  {/* Progress bar */}
+                  {!achievement.earned && (
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                      <div 
+                        className="bg-ecoPrimary h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, achievement.progress)}%` }}
+                      />
+                    </div>
+                  )}
+                  
+                  {achievement.earned && achievement.date && (
+                    <p className="text-xs text-green-600">
+                      Earned on {new Date(achievement.date).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>
   );
+}
+
+// Helper function to calculate achievement progress
+function calculateProgress(
+  definition: AchievementDefinition,
+  profile: any,
+  achievements: any[]
+): number {
+  if (!profile) return 0;
+
+  switch (definition.requirements.type) {
+    case 'single':
+      if (!definition.requirements.metric || !definition.requirements.threshold) return 0;
+      const currentValue = profile[definition.requirements.metric] || 0;
+      return Math.min(100, (currentValue / definition.requirements.threshold) * 100);
+
+    case 'multiple':
+      if (!definition.requirements.requirements) return 0;
+      const progressValues = definition.requirements.requirements.map(req => {
+        const value = profile[req.metric] || 0;
+        return Math.min(100, (value / req.threshold) * 100);
+      });
+      return progressValues.reduce((sum, val) => sum + val, 0) / progressValues.length;
+
+    case 'achievements':
+      if (!definition.requirements.required) return 0;
+      const earnedCount = definition.requirements.required.filter(id => 
+        achievements?.some(a => a.achievement_id === id)
+      ).length;
+      return (earnedCount / definition.requirements.required.length) * 100;
+
+    default:
+      return 0;
+  }
 }
