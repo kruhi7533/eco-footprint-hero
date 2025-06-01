@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      achievement_definitions: {
+        Row: {
+          achievement_id: string
+          category: string
+          created_at: string | null
+          description: string
+          icon_name: string
+          id: string
+          level: number | null
+          points: number | null
+          requirements: Json | null
+          threshold: number | null
+          title: string
+          unit: string | null
+        }
+        Insert: {
+          achievement_id: string
+          category: string
+          created_at?: string | null
+          description: string
+          icon_name: string
+          id?: string
+          level?: number | null
+          points?: number | null
+          requirements?: Json | null
+          threshold?: number | null
+          title: string
+          unit?: string | null
+        }
+        Update: {
+          achievement_id?: string
+          category?: string
+          created_at?: string | null
+          description?: string
+          icon_name?: string
+          id?: string
+          level?: number | null
+          points?: number | null
+          requirements?: Json | null
+          threshold?: number | null
+          title?: string
+          unit?: string | null
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           achievement_id: string
@@ -39,74 +84,74 @@ export type Database = {
       carbon_entries: {
         Row: {
           activity_type: string
-          amount: number | null
+          amount: number
           category: string
           created_at: string | null
-          date: string | null
+          date: string
           emissions: number
           id: string
           notes: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           activity_type: string
-          amount?: number | null
+          amount: number
           category: string
           created_at?: string | null
-          date?: string | null
+          date: string
           emissions: number
           id?: string
           notes?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           activity_type?: string
-          amount?: number | null
+          amount?: number
           category?: string
           created_at?: string | null
-          date?: string | null
+          date?: string
           emissions?: number
           id?: string
           notes?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
       daily_summaries: {
         Row: {
           created_at: string | null
-          date: string | null
+          date: string
           diet: number | null
           energy: number | null
           id: string
           total: number | null
           transportation: number | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
           waste: number | null
         }
         Insert: {
           created_at?: string | null
-          date?: string | null
+          date: string
           diet?: number | null
           energy?: number | null
           id?: string
           total?: number | null
           transportation?: number | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
           waste?: number | null
         }
         Update: {
           created_at?: string | null
-          date?: string | null
+          date?: string
           diet?: number | null
           energy?: number | null
           id?: string
           total?: number | null
           transportation?: number | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
           waste?: number | null
         }
         Relationships: []
@@ -114,66 +159,140 @@ export type Database = {
       eco_tips: {
         Row: {
           category: string
+          content: string
+          created_at: string | null
           id: string
-          impact_level: number | null
-          tip: string
+          impact_level: number
         }
         Insert: {
           category: string
+          content: string
+          created_at?: string | null
           id?: string
-          impact_level?: number | null
-          tip: string
+          impact_level: number
         }
         Update: {
           category?: string
+          content?: string
+          created_at?: string | null
           id?: string
-          impact_level?: number | null
-          tip?: string
+          impact_level?: number
         }
         Relationships: []
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           consecutive_days: number | null
+          data_sharing_enabled: boolean | null
           eco_points: number | null
           email: string | null
           energy_savings: number | null
           id: string
           joined_date: string | null
+          language: string | null
           level: number | null
           measurement_unit: string | null
           name: string | null
+          notifications_enabled: boolean | null
           transportation_reductions: number | null
           updated_at: string | null
           waste_reduction: number | null
         }
         Insert: {
+          avatar_url?: string | null
           consecutive_days?: number | null
+          data_sharing_enabled?: boolean | null
           eco_points?: number | null
           email?: string | null
           energy_savings?: number | null
           id: string
           joined_date?: string | null
+          language?: string | null
           level?: number | null
           measurement_unit?: string | null
           name?: string | null
+          notifications_enabled?: boolean | null
           transportation_reductions?: number | null
           updated_at?: string | null
           waste_reduction?: number | null
         }
         Update: {
+          avatar_url?: string | null
           consecutive_days?: number | null
+          data_sharing_enabled?: boolean | null
           eco_points?: number | null
           email?: string | null
           energy_savings?: number | null
           id?: string
           joined_date?: string | null
+          language?: string | null
           level?: number | null
           measurement_unit?: string | null
           name?: string | null
+          notifications_enabled?: boolean | null
           transportation_reductions?: number | null
           updated_at?: string | null
           waste_reduction?: number | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievement_definitions"
+            referencedColumns: ["achievement_id"]
+          },
+        ]
+      }
+      user_baselines: {
+        Row: {
+          created_at: string | null
+          diet_emissions: number
+          energy_emissions: number
+          id: string
+          transportation_emissions: number
+          user_id: string
+          waste_emissions: number
+        }
+        Insert: {
+          created_at?: string | null
+          diet_emissions?: number
+          energy_emissions?: number
+          id?: string
+          transportation_emissions?: number
+          user_id: string
+          waste_emissions?: number
+        }
+        Update: {
+          created_at?: string | null
+          diet_emissions?: number
+          energy_emissions?: number
+          id?: string
+          transportation_emissions?: number
+          user_id?: string
+          waste_emissions?: number
         }
         Relationships: []
       }
@@ -182,7 +301,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_progress: {
+        Args: { user_uuid: string }
+        Returns: {
+          category: string
+          current_emissions: number
+          baseline_emissions: number
+          reduction: number
+          percentage: number
+        }[]
+      }
+      refresh_daily_summaries: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
