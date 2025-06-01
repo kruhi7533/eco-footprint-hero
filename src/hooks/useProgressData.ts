@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -12,7 +13,7 @@ export type ProgressData = Array<{
 
 export function useProgressData() {
   const { user } = useAuth();
-  const [progress, setProgress] = useState<ProgressData | null>(null);
+  const [progressData, setProgressData] = useState<ProgressData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -42,7 +43,7 @@ export function useProgressData() {
       }
 
       console.log('Progress data:', data);
-      setProgress(data);
+      setProgressData(data);
     } catch (err) {
       console.error('Progress fetch error:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch progress data'));
@@ -55,16 +56,16 @@ export function useProgressData() {
     if (user) {
       fetchProgress();
     } else {
-      setProgress(null);
+      setProgressData(null);
       setError(null);
       setIsLoading(false);
     }
   }, [user]);
 
   return {
-    progress,
+    progressData,
     isLoading,
     error,
     refreshProgress: fetchProgress
   };
-} 
+}
