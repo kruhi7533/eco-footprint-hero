@@ -1,3 +1,4 @@
+
 export type Profile = {
   id: string;
   name: string | null;
@@ -12,4 +13,4 @@ export type Profile = {
   joined_date: string | null;
   updated_at: string | null;
   avatar_url: string | null;
-}; 
+};
