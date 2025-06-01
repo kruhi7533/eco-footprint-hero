@@ -256,4 +256,4 @@ export function AvatarUpload() {
       </p>
     </div>
   );
-} 
+}
