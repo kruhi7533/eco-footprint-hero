@@ -1,16 +1,40 @@
 
-export type Profile = {
+export interface Profile {
   id: string;
-  name: string | null;
-  email: string | null;
-  level: number | null;
-  measurement_unit: string | null;
-  eco_points: number | null;
-  consecutive_days: number | null;
-  energy_savings: number | null;
-  transportation_reductions: number | null;
-  waste_reduction: number | null;
-  joined_date: string | null;
-  updated_at: string | null;
-  avatar_url: string | null;
-};
+  email: string;
+  full_name: string;
+  avatar_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CarbonEntry {
+  id: string;
+  user_id: string;
+  category: 'transport' | 'energy' | 'waste' | 'diet';
+  subcategory: string;
+  amount: number;
+  unit: string;
+  carbon_footprint: number;
+  date: string;
+  created_at: string;
+}
+
+export interface EcoTip {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  impact_level: 'low' | 'medium' | 'high';
+  created_at: string;
+}
+
+export interface Achievement {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  icon: string;
+  earned_at: string;
+  created_at: string;
+}

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Leaf, ArrowRight, ArrowLeft, User, Mail, Lock } from "lucide-react";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 const SlidingAuth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -50,7 +50,12 @@ const SlidingAuth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ecoLight via-white to-green-50 p-4 overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-ecoLight via-white to-green-50 p-4 overflow-hidden dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Theme Switcher - positioned at top right */}
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeSwitcher />
+      </div>
+
       <div className="w-full max-w-4xl relative">
         {/* Logo and Brand */}
         <div className="text-center mb-8 animate-fade-in">
@@ -60,14 +65,14 @@ const SlidingAuth = () => {
             </div>
           </div>
           <h1 className="text-4xl font-bold text-ecoPrimary mb-2 gradient-text">EcoStep</h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             {isSignUp ? "Join the movement for a greener future" : "Track your carbon footprint"}
           </p>
         </div>
         
         {/* Sliding Card Container */}
         <div className="relative">
-          <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm overflow-hidden">
+          <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm overflow-hidden dark:bg-gray-800/90">
             <CardContent className="p-0">
               {/* Background sliding panels */}
               <div className="relative h-[600px]">
@@ -139,11 +144,11 @@ const SlidingAuth = () => {
                   style={{ width: "200%" }}
                 >
                   {/* Login Form */}
-                  <div className="w-1/2 bg-white p-8 flex items-center">
+                  <div className="w-1/2 bg-white dark:bg-gray-800 p-8 flex items-center">
                     <div className="w-full max-w-md mx-auto space-y-6">
                       <div className="text-center">
                         <h2 className="text-2xl font-bold text-ecoPrimary">Sign In</h2>
-                        <p className="text-gray-600 mt-2">Access your eco dashboard</p>
+                        <p className="text-gray-600 dark:text-gray-300 mt-2">Access your eco dashboard</p>
                       </div>
                       
                       <form onSubmit={handleSubmit} className="space-y-4">
@@ -200,11 +205,11 @@ const SlidingAuth = () => {
                   </div>
 
                   {/* Sign Up Form */}
-                  <div className="w-1/2 bg-white p-8 flex items-center">
+                  <div className="w-1/2 bg-white dark:bg-gray-800 p-8 flex items-center">
                     <div className="w-full max-w-md mx-auto space-y-6">
                       <div className="text-center">
                         <h2 className="text-2xl font-bold text-ecoPrimary">Create Account</h2>
-                        <p className="text-gray-600 mt-2">Start your sustainability journey</p>
+                        <p className="text-gray-600 dark:text-gray-300 mt-2">Start your sustainability journey</p>
                       </div>
                       
                       <form onSubmit={handleSubmit} className="space-y-4">
