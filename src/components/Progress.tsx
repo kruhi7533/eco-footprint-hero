@@ -1,35 +1,46 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarDays, TrendingDown, TrendingUp, Target } from "lucide-react";
+import { CalendarDays, TrendingDown, TrendingUp, Target, Loader2 } from "lucide-react";
 import { useProgressData } from "@/hooks/useProgressData";
 
 interface ProgressProps {
-  progress?: any; // Make this optional to handle the prop being passed
+  progress?: any;
 }
 
 export function Progress({ progress }: ProgressProps = {}) {
-  const { progressData, isLoading } = useProgressData();
+  const { progressData, isLoading, error } = useProgressData();
 
-  // Use the passed progress prop or fall back to hook data
   const dataToUse = progress || progressData;
 
   if (isLoading) {
     return (
       <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/3"></div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted rounded"></div>
-            ))}
-          </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-ecoPrimary" />
+          <span className="ml-2">Loading progress data...</span>
         </div>
       </div>
     );
   }
 
-  if (!dataToUse) {
+  if (error) {
+    return (
+      <div className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Progress Overview</h2>
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-red-600">
+              Error loading progress data: {error.message}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!dataToUse || dataToUse.length === 0) {
     return (
       <div className="p-6">
         <h2 className="text-2xl font-bold mb-6">Progress Overview</h2>
@@ -41,24 +52,32 @@ export function Progress({ progress }: ProgressProps = {}) {
     );
   }
 
+  // Calculate total reduction across all categories
+  const totalReduction = dataToUse.reduce((sum: number, category: any) => {
+    return sum + (category.percentage || 0);
+  }, 0) / dataToUse.length;
+
+  // Calculate goal progress (assuming 20% reduction target)
+  const goalProgress = Math.min(100, totalReduction);
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Progress Overview</h2>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <CalendarDays className="w-4 h-4" />
-          Last 30 days
+          Last 7 days vs baseline
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {dataToUse.categories?.map((category: any) => (
-          <Card key={category.name}>
+        {dataToUse.map((category: any) => (
+          <Card key={category.category}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium capitalize">
-                {category.name}
+                {category.category}
               </CardTitle>
-              {category.improvement > 0 ? (
+              {category.percentage > 0 ? (
                 <TrendingDown className="h-4 w-4 text-green-600" />
               ) : (
                 <TrendingUp className="h-4 w-4 text-red-600" />
@@ -66,20 +85,23 @@ export function Progress({ progress }: ProgressProps = {}) {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {category.improvement > 0 ? '-' : '+'}{Math.abs(category.improvement)}%
+                {category.percentage > 0 ? '-' : '+'}{Math.abs(category.percentage).toFixed(1)}%
               </div>
               <p className="text-xs text-muted-foreground">
-                vs. last month
+                vs. baseline
               </p>
               <div className="mt-3">
                 <ProgressBar 
-                  value={Math.abs(category.improvement)} 
-                  className={category.improvement > 0 ? "bg-green-100" : "bg-red-100"}
+                  value={Math.min(100, Math.abs(category.percentage))} 
+                  className={category.percentage > 0 ? "bg-green-100" : "bg-red-100"}
                 />
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                Current: {category.current_emissions.toFixed(1)} kg CO₂
               </div>
             </CardContent>
           </Card>
-        )) || <div>No category data available</div>}
+        ))}
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
@@ -97,10 +119,10 @@ export function Progress({ progress }: ProgressProps = {}) {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
-                  -{dataToUse.totalReduction || 0}%
+                  -{totalReduction.toFixed(1)}%
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Since you started tracking
+                  Average across all categories
                 </p>
               </CardContent>
             </Card>
@@ -108,14 +130,14 @@ export function Progress({ progress }: ProgressProps = {}) {
             <Card>
               <CardHeader>
                 <CardTitle>Goal Progress</CardTitle>
-                <CardDescription>Progress towards your monthly goal</CardDescription>
+                <CardDescription>Progress towards 20% reduction goal</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Target className="h-4 w-4" />
-                  <span className="text-2xl font-bold">{dataToUse.goalProgress || 0}%</span>
+                  <span className="text-2xl font-bold">{goalProgress.toFixed(0)}%</span>
                 </div>
-                <ProgressBar value={dataToUse.goalProgress || 0} className="mt-2" />
+                <ProgressBar value={goalProgress} className="mt-2" />
               </CardContent>
             </Card>
           </div>
@@ -129,17 +151,25 @@ export function Progress({ progress }: ProgressProps = {}) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {dataToUse.categories?.map((category: any) => (
-                  <div key={category.name} className="flex items-center justify-between">
-                    <span className="capitalize">{category.name}</span>
-                    <div className="flex items-center gap-2">
-                      <ProgressBar value={Math.abs(category.improvement)} className="w-24" />
-                      <span className={`text-sm ${category.improvement > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {category.improvement > 0 ? '-' : '+'}{Math.abs(category.improvement)}%
+                {dataToUse.map((category: any) => (
+                  <div key={category.category} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="capitalize font-medium">{category.category}</span>
+                      <span className={`text-sm ${category.percentage > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {category.percentage > 0 ? '-' : '+'}{Math.abs(category.percentage).toFixed(1)}%
                       </span>
                     </div>
+                    <ProgressBar 
+                      value={Math.min(100, Math.abs(category.percentage))} 
+                      className="w-full" 
+                    />
+                    <div className="text-xs text-muted-foreground">
+                      Current: {category.current_emissions.toFixed(1)} kg CO₂ | 
+                      Baseline: {category.baseline_emissions.toFixed(1)} kg CO₂ | 
+                      Reduction: {category.reduction.toFixed(1)} kg CO₂
+                    </div>
                   </div>
-                )) || <div>No detailed data available</div>}
+                ))}
               </div>
             </CardContent>
           </Card>
