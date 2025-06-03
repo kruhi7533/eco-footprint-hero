@@ -75,7 +75,7 @@ export function Settings() {
   useEffect(() => {
     if (!authLoading && profile) {
       setUserName(profile.name || '');
-      setMeasurementUnit(profile.measurement_unit || 'metric');
+      setMeasurementUnit(profile.measurement_unit as MeasurementUnit || 'metric');
       setLanguage(profile.language || 'en');
       setNotifications(profile.notifications_enabled ?? true);
       setDataSharing(profile.data_sharing_enabled ?? false);
@@ -171,6 +171,9 @@ export function Settings() {
         .update({
           name: userName.trim(),
           measurement_unit: measurementUnit,
+          language: language,
+          notifications_enabled: notifications,
+          data_sharing_enabled: dataSharing,
           updated_at: new Date().toISOString()
         })
         .eq('id', profile.id)
@@ -186,7 +189,7 @@ export function Settings() {
     } finally {
       setIsUpdating(false);
     }
-  }, [isUpdating, profile?.id, userName, measurementUnit, refreshProfile]);
+  }, [isUpdating, profile?.id, userName, measurementUnit, language, notifications, dataSharing, refreshProfile]);
 
   const handlePasswordChange = async () => {
     // Dismiss any existing toasts
@@ -341,6 +344,12 @@ export function Settings() {
     }
   };
 
+  const handleMeasurementUnitChange = useCallback((value: string) => {
+    if (value === 'metric' || value === 'imperial') {
+      setMeasurementUnit(value as MeasurementUnit);
+    }
+  }, []);
+
   if (authLoading || !isInitialized) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -394,7 +403,6 @@ export function Settings() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
                     <p className="text-sm text-muted-foreground mb-4">
                       Manage your account details and preferences.
                     </p>
@@ -543,7 +551,7 @@ export function Settings() {
                       <Label htmlFor="units">Measurement Units</Label>
                       <Select 
                         value={measurementUnit} 
-                        onValueChange={(value: MeasurementUnit) => setMeasurementUnit(value)}
+                        onValueChange={handleMeasurementUnitChange}
                         disabled={isUpdating}
                       >
                         <SelectTrigger id="units">

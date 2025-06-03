@@ -29,22 +29,37 @@ export function useCarbonData(days = 7) {
   const { data: summaries, isLoading: isLoadingSummaries, error: summariesError } = useQuery({
     queryKey: ['dailySummaries', user?.id, days],
     queryFn: async () => {
-      if (!user) throw new Error('User not authenticated');
-      
-      const { startDate, endDate } = getDateRange();
-      const { data, error } = await supabase
-        .from('daily_summaries')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .order('date');
+      try {
+        if (!user) {
+          console.error('User not authenticated');
+          throw new Error('User not authenticated');
+        }
         
-      if (error) throw error;
-      
-      // If we don't have data for all days, fill in empty days
-      const filledData = fillMissingDays(data || [], startDate, endDate);
-      return filledData as DailySummary[];
+        const { startDate, endDate } = getDateRange();
+        console.log('Fetching data for date range:', startDate, endDate);
+        
+        const { data, error } = await supabase
+          .from('daily_summaries')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('date', startDate)
+          .lte('date', endDate)
+          .order('date');
+        
+        if (error) {
+          console.error('Supabase error:', error.message);
+          throw new Error(`Failed to fetch data: ${error.message}`);
+        }
+        
+        console.log('Fetched data:', data);
+        
+        // If we don't have data for all days, fill in empty days
+        const filledData = fillMissingDays(data || [], startDate, endDate);
+        return filledData as DailySummary[];
+      } catch (err) {
+        console.error('Error in useCarbonData:', err);
+        throw err;
+      }
     },
     enabled: !!user,
   });
