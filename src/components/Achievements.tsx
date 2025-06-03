@@ -74,7 +74,8 @@ export function Achievements() {
       points: 10,
       earned: (summaries && summaries.length > 0),
       progress: summaries && summaries.length > 0 ? 100 : 0,
-      category: 'general'
+      category: 'general',
+      earned_at: summaries && summaries.length > 0 ? summaries[0].created_at : null
     },
     {
       id: 'week_streak',
@@ -85,7 +86,8 @@ export function Achievements() {
       points: 50,
       earned: (profile?.consecutive_days || 0) >= 7,
       progress: Math.min(100, ((profile?.consecutive_days || 0) / 7) * 100),
-      category: 'streak'
+      category: 'streak',
+      earned_at: (profile?.consecutive_days || 0) >= 7 ? new Date().toISOString() : null
     },
     {
       id: 'transport_reducer',
@@ -96,7 +98,8 @@ export function Achievements() {
       points: 75,
       earned: (profile?.transportation_reductions || 0) >= 50,
       progress: Math.min(100, ((profile?.transportation_reductions || 0) / 50) * 100),
-      category: 'transportation'
+      category: 'transportation',
+      earned_at: (profile?.transportation_reductions || 0) >= 50 ? new Date().toISOString() : null
     },
     {
       id: 'energy_saver',
@@ -107,7 +110,8 @@ export function Achievements() {
       points: 100,
       earned: (profile?.energy_savings || 0) >= 100,
       progress: Math.min(100, ((profile?.energy_savings || 0) / 100) * 100),
-      category: 'energy'
+      category: 'energy',
+      earned_at: (profile?.energy_savings || 0) >= 100 ? new Date().toISOString() : null
     },
     {
       id: 'month_streak',
@@ -118,7 +122,8 @@ export function Achievements() {
       points: 200,
       earned: (profile?.consecutive_days || 0) >= 30,
       progress: Math.min(100, ((profile?.consecutive_days || 0) / 30) * 100),
-      category: 'streak'
+      category: 'streak',
+      earned_at: (profile?.consecutive_days || 0) >= 30 ? new Date().toISOString() : null
     },
     {
       id: 'eco_warrior',
@@ -129,7 +134,8 @@ export function Achievements() {
       points: 500,
       earned: (profile?.eco_points || 0) >= 1000,
       progress: Math.min(100, ((profile?.eco_points || 0) / 1000) * 100),
-      category: 'points'
+      category: 'points',
+      earned_at: (profile?.eco_points || 0) >= 1000 ? new Date().toISOString() : null
     }
   ];
 

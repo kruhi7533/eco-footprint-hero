@@ -59,7 +59,7 @@ const ImprovementTipsSection = memo(() => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold flex items-center gap-2 mb-2 text-green-50">
+        <h2 className="text-2xl font-bold flex items-center gap-2 mb-2 text-white">
           <Lightbulb className="h-6 w-6" />
           Improvement Tips
         </h2>
@@ -72,23 +72,23 @@ const ImprovementTipsSection = memo(() => {
         {improvementTips.map((tip) => (
           <Card
             key={tip.id}
-            className="relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl bg-gradient-to-br from-green-700 to-green-800 border-green-600 group"
+            className="relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-xl bg-ecoPrimary border-ecoSecondary group"
             onClick={() => handleTipClick(tip.link)}
           >
-            <div className="p-6 text-green-50 min-h-[160px] flex flex-col justify-between relative z-10">
+            <div className="p-6 text-white min-h-[160px] flex flex-col justify-between relative z-10">
               <div>
                 <h3 className="text-lg font-bold mb-2">{tip.title}</h3>
                 <p className="text-green-100 text-sm leading-relaxed mb-4">{tip.description}</p>
               </div>
               
               <div className="flex items-center">
-                <span className="inline-flex items-center text-green-50 font-medium hover:text-green-100 transition-colors text-sm">
+                <span className="inline-flex items-center text-white font-medium hover:text-green-100 transition-colors text-sm">
                   Learn More
                   <ExternalLink className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </span>
               </div>
 
-              <div className="absolute -right-2 bottom-0 text-[80px] font-bold opacity-10 select-none pointer-events-none leading-none text-green-400">
+              <div className="absolute -right-2 bottom-0 text-[80px] font-bold opacity-10 select-none pointer-events-none leading-none text-green-300">
                 {String(tip.id).padStart(2, '0')}
               </div>
             </div>
@@ -119,10 +119,10 @@ const CategoryCard = memo(({ category }: { category: any }) => {
   }, []);
 
   return (
-    <Card className="bg-green-800/50 border-green-600 backdrop-blur-sm">
+    <Card className="bg-ecoPrimary border-ecoSecondary">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <div>
-          <CardTitle className="text-sm font-medium capitalize flex items-center gap-2 text-green-50">
+          <CardTitle className="text-sm font-medium capitalize flex items-center gap-2 text-white">
             {getCategoryIcon(category.category)}
             {category.category}
           </CardTitle>
@@ -140,7 +140,7 @@ const CategoryCard = memo(({ category }: { category: any }) => {
             <div className="text-sm text-green-200">Baseline: {category.baseline_emissions.toFixed(1)} kg</div>
           </div>
           
-          <div className="w-full bg-green-900/50 rounded-full h-2">
+          <div className="w-full bg-ecoSecondary/30 rounded-full h-2">
             <div 
               className="bg-green-400 h-2 rounded-full transition-all duration-500"
               style={{ width: `${Math.min(100, Math.abs(category.percentage))}%` }}
@@ -166,7 +166,7 @@ export function Progress({ progress }: ProgressProps = {}) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900">
+      <div className="min-h-screen bg-ecoPrimary">
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-green-400" />
           <span className="ml-2 text-green-100">Loading progress data...</span>
@@ -177,9 +177,9 @@ export function Progress({ progress }: ProgressProps = {}) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900 p-6">
-        <h2 className="text-2xl font-bold mb-6 text-green-50">Progress Overview</h2>
-        <Card className="bg-green-800/50 border-green-600">
+      <div className="min-h-screen bg-ecoPrimary p-6">
+        <h2 className="text-2xl font-bold mb-6 text-white">Progress Overview</h2>
+        <Card className="bg-ecoSecondary border-ecoAccent">
           <CardContent className="pt-6">
             <p className="text-center text-red-400">
               Error loading progress data: {error.message}
@@ -192,8 +192,8 @@ export function Progress({ progress }: ProgressProps = {}) {
 
   if (!dataToUse || dataToUse.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900 p-6">
-        <h2 className="text-2xl font-bold mb-6 text-green-50">Progress Overview</h2>
+      <div className="min-h-screen bg-ecoPrimary p-6">
+        <h2 className="text-2xl font-bold mb-6 text-white">Progress Overview</h2>
         <div className="text-center py-8">
           <p className="text-green-200">No progress data available yet.</p>
           <p className="text-sm text-green-300 mt-2">Start tracking your carbon footprint to see your progress!</p>
@@ -208,9 +208,9 @@ export function Progress({ progress }: ProgressProps = {}) {
   }, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900">
+    <div className="min-h-screen bg-ecoPrimary">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-800 to-green-900 text-green-50 p-8 mb-8">
+      <div className="bg-ecoPrimary text-white p-8 mb-8">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">Your Progress</h1>
           <p className="text-green-200 mb-8">
@@ -218,13 +218,13 @@ export function Progress({ progress }: ProgressProps = {}) {
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-green-800/30 backdrop-blur-sm rounded-lg p-6 border border-green-600">
+            <div className="bg-ecoSecondary/30 backdrop-blur-sm rounded-lg p-6 border border-ecoAccent">
               <h3 className="text-sm font-medium text-green-200 mb-2">Current Level</h3>
-              <div className="text-3xl font-bold text-green-100">{profile?.level || 1}</div>
+              <div className="text-3xl font-bold text-white">{profile?.level || 1}</div>
             </div>
-            <div className="bg-green-800/30 backdrop-blur-sm rounded-lg p-6 border border-green-600">
+            <div className="bg-ecoSecondary/30 backdrop-blur-sm rounded-lg p-6 border border-ecoAccent">
               <h3 className="text-sm font-medium text-green-200 mb-2">Total Reductions</h3>
-              <div className="text-3xl font-bold text-green-100">{totalReduction.toFixed(1)} kg CO₂</div>
+              <div className="text-3xl font-bold text-white">{totalReduction.toFixed(1)} kg CO₂</div>
             </div>
           </div>
         </div>
@@ -239,9 +239,9 @@ export function Progress({ progress }: ProgressProps = {}) {
         </div>
 
         {/* Emissions Trend Chart */}
-        <Card className="bg-green-800/50 border-green-600 backdrop-blur-sm">
+        <Card className="bg-ecoSecondary border-ecoAccent">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-50">
+            <CardTitle className="flex items-center gap-2 text-white">
               <TrendingDown className="h-5 w-5" />
               Emissions Trend
             </CardTitle>
@@ -267,8 +267,8 @@ export function Progress({ progress }: ProgressProps = {}) {
                   />
                   <Tooltip 
                     contentStyle={{
-                      backgroundColor: 'rgba(21, 128, 61, 0.9)',
-                      border: '1px solid #16a34a',
+                      backgroundColor: '#1B4332',
+                      border: '1px solid #2D6A4F',
                       borderRadius: '8px',
                       color: '#bbf7d0'
                     }}
