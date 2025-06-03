@@ -5,6 +5,7 @@ import { SummaryCard } from "./SummaryCard";
 import { CarbonChart } from "./CarbonChart";
 import { EcoTips } from "./EcoTips";
 import { Achievements } from "./Achievements";
+import { CarbonBenchmarking } from "./CarbonBenchmarking";
 import { useCarbonData } from "@/hooks/useCarbonData";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -92,58 +93,8 @@ export function Dashboard() {
         />
       </div>
       
-      {/* Comparison card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle>Your Carbon Footprint</CardTitle>
-          <CardDescription>Compare your impact with average emissions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium">Your Average</span>
-                <span className="text-sm text-muted-foreground">
-                  {summaries && summaries.length > 0 
-                    ? (summaries.reduce((sum, day) => sum + day.total, 0) / summaries.length).toFixed(1) 
-                    : "0"} kg/day
-                </span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-ecoPrimary rounded-full" 
-                  style={{ width: `${summaries && summaries.length > 0 ? 
-                    Math.min((summaries.reduce((sum, day) => sum + day.total, 0) / summaries.length) / 15 * 100, 100) : 0}%` }}
-                />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium">Country Average</span>
-                <span className="text-sm text-muted-foreground">15 kg/day</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-ecoSecondary rounded-full" 
-                  style={{ width: `${15 / 15 * 100}%` }}
-                />
-              </div>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium">Global Average</span>
-                <span className="text-sm text-muted-foreground">12 kg/day</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-ecoAccent rounded-full" 
-                  style={{ width: `${12 / 15 * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Enhanced Carbon Benchmarking */}
+      <CarbonBenchmarking />
       
       {/* Charts and tips */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">

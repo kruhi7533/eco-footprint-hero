@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js'
 
 // Types for our Supabase database
@@ -5,6 +6,7 @@ export type Profile = {
   id: string;
   name: string;
   email: string;
+  avatar_url?: string;
   joined_date: string;
   level: number;
   eco_points: number;
@@ -102,6 +104,7 @@ export const getProfile = async () => {
         id: user.id,
         email: user.email,
         name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+        avatar_url: user.user_metadata?.avatar_url || null,
         joined_date: new Date().toISOString(),
         level: 1,
         eco_points: 0,
