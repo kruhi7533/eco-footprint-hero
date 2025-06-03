@@ -28,28 +28,40 @@ export function useLiveBenchmarkData() {
   return useQuery({
     queryKey: ['live-benchmark-data'],
     queryFn: async (): Promise<BenchmarkData> => {
+      console.log('Fetching live benchmark data...');
+      
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         throw new Error('No authenticated session');
       }
 
-      const response = await fetch('/supabase/functions/v1/climatiq-benchmark', {
-        method: 'POST',
+      const { data, error } = await supabase.functions.invoke('climatiq-benchmark', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Failed to fetch benchmark data: ${error.message}`);
       }
 
-      return await response.json();
+      if (!data) {
+        throw new Error('No data received from benchmark API');
+      }
+
+      console.log('Successfully fetched live benchmark data:', data);
+      return data;
     },
     staleTime: 1000 * 60 * 30, // Consider data fresh for 30 minutes
     refetchInterval: 1000 * 60 * 60, // Refetch every hour
     retry: 2,
+    onError: (error) => {
+      console.error('Live benchmark data fetch error:', error);
+    },
+    onSuccess: (data) => {
+      console.log('Live benchmark data loaded successfully');
+    }
   });
 }
