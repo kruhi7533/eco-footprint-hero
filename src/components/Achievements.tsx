@@ -138,7 +138,8 @@ export function Achievements() {
     [...dynamicAchievements, ...definitions.map(def => ({
       ...def,
       earned: achievements?.some(a => a.achievement_id === def.achievement_id) || false,
-      progress: calculateProgress(def, profile, achievements)
+      progress: calculateProgress(def, profile, achievements),
+      earned_at: achievements?.find(a => a.achievement_id === def.achievement_id)?.earned_at
     }))] :
     dynamicAchievements;
 
@@ -210,9 +211,9 @@ export function Achievements() {
                     </p>
                   )}
                   
-                  {achievement.earned && achievement.date && (
+                  {achievement.earned && achievement.earned_at && (
                     <p className="text-xs text-green-600">
-                      Earned on {new Date(achievement.date).toLocaleDateString()}
+                      Earned on {new Date(achievement.earned_at).toLocaleDateString()}
                     </p>
                   )}
                 </div>
